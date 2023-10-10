@@ -93,18 +93,7 @@ fn main() {
 
         }
     }
-    // Perform DFS starting from the top-left corner (0, 0)
-    // let mut visited: HashSet<(usize, usize)> = HashSet::new();
-    // match board.dfs(&mut visited, car_position.0, car_position.1, 0) {
-    //     Some(result) => {
-    //         println!("{}",result);
-    //     }
-    //     None => {
-    //         println!("None");
-    //     }
-    // }
     print_board(&board.board);
-    //println!("{:?}",car_position);
 }
 
 fn print_board(board: &Vec<Vec<char>>) {
