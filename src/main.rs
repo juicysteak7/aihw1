@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{self, BufRead};
+use rand::Rng;
 
 use std::collections:: {HashMap, HashSet, VecDeque};
 
@@ -22,19 +23,27 @@ impl Board {
 }
 
 fn main() {
-    let mut read_board:Vec<Vec<char>> = Vec::new();
-    match read_bug_rush_board("bugrush.txt") {
-        Ok(result) => {
-            read_board = result;
-        }
-        Err(error) => {
-            println!("{}",error);
-        }
+    // let mut read_board:Vec<Vec<char>> = Vec::new();
+    // match read_bug_rush_board("bugrush.txt") {
+    //     Ok(result) => {
+    //         read_board = result;
+    //     }
+    //     Err(error) => {
+    //         println!("{}",error);
+    //     }
+    // }
+    // let rows = read_board.len();
+    // let cols = read_board[0].len();
+    // let board:Board = Board::new(read_board, rows, cols);
+    let n = 3;
+    let mut board:Board = Board::new(generate_random_bug_rush(n),n,n);
+    while !is_solvable(&board.board) {
+        board.board = generate_random_bug_rush(n);
     }
-    let rows = read_board.len();
-    let cols = read_board[0].len();
-    let board:Board = Board::new(read_board, rows, cols);
-    if !is_solvable(&board) {
+    println!("-----------Initial board state----------");
+    print_board(&board.board);
+    println!("----------------------------------------");
+    if !is_solvable(&board.board) {
         println!("Unsat");
     }else{
         let solution = solve_bug_rush_bfs(&board);
@@ -53,6 +62,40 @@ fn main() {
         }
     }
     // print_board(&board.board);
+}
+
+fn generate_random_bug_rush(n: usize) -> Vec<Vec<char>> {
+    let mut rng = rand::thread_rng();
+    let mut board: Vec<Vec<char>> = vec![vec![' '; n]; n];
+    let empty_space = ' ';
+    let horizontal_car = '-';
+    let vertical_car = '|';
+    let goal_car = '>';
+
+    // // Place the goal car ('>') in the middle of the last row
+    // let goal_col = rng.gen_range(0..n);
+    // board[n - 1][goal_col] = goal_car;
+
+    // Fill the rest of the board with random cars
+    for row in 0..n {
+        for col in 0..n {
+            let car_type = if rng.gen_bool(0.5) { horizontal_car } else { vertical_car };
+            board[row][col] = car_type;
+        }
+    }
+
+    // Make some of the cars empty spaces
+    for _ in 0..(n * n / 2) {
+        let row = rng.gen_range(0..n);
+        let col = rng.gen_range(0..n);
+        board[row][col] = empty_space;
+    }
+
+    // Place the goal car ('>') in the middle of the last row
+    //let goal_col = rng.gen_range(0..n);
+    board[n - 1][0] = goal_car;
+
+    board
 }
 
 fn print_board(board: &Vec<Vec<char>>) {
@@ -80,8 +123,23 @@ fn read_bug_rush_board(filename: &str) -> io::Result<Vec<Vec<char>>> {
     Ok(board)
 }
 
-fn is_solvable(board: &Board) -> bool {
-    let flattened_board: Vec<char> = board.board.iter().flatten().cloned().collect();
+fn is_solvable(board: &Vec<Vec<char>>) -> bool {
+    let mut goal_car_found = false;
+    for row in board {
+        for col in row {
+            if *col == '>' {
+                goal_car_found = true;
+            } else {
+                if goal_car_found && *col == '-'{
+                    return false;
+                }
+            }
+        }
+        if goal_car_found {
+            break;
+        }
+    }
+    let flattened_board: Vec<char> = board.iter().flatten().cloned().collect();
 
     // Count the number of inversions
     let mut inversions = 0;
