@@ -37,7 +37,7 @@ fn main() {
     if !is_solvable(&board) {
         println!("Unsat");
     }else{
-        let solution = solve_bug_rush(&board);
+        let solution = solve_bug_rush_bfs(&board);
         let mut steps:usize = 0;
         match solution {
             Some(result) => {
@@ -97,7 +97,7 @@ fn is_solvable(board: &Board) -> bool {
     inversions % 2 == 0
 }
 
-fn solve_bug_rush(initial_state: &Board) -> Option<Vec<Board>> {
+fn solve_bug_rush_bfs(initial_state: &Board) -> Option<Vec<Board>> {
     let mut queue: VecDeque<Board> = VecDeque::new();
     let mut visited: HashSet<Board> = HashSet::new();
     let mut parent: HashMap<Board, Board> = HashMap::new();
