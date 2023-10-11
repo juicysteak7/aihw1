@@ -72,10 +72,6 @@ fn generate_random_bug_rush(n: usize) -> Vec<Vec<char>> {
     let vertical_car = '|';
     let goal_car = '>';
 
-    // // Place the goal car ('>') in the middle of the last row
-    // let goal_col = rng.gen_range(0..n);
-    // board[n - 1][goal_col] = goal_car;
-
     // Fill the rest of the board with random cars
     for row in 0..n {
         for col in 0..n {
@@ -91,8 +87,7 @@ fn generate_random_bug_rush(n: usize) -> Vec<Vec<char>> {
         board[row][col] = empty_space;
     }
 
-    // Place the goal car ('>') in the middle of the last row
-    //let goal_col = rng.gen_range(0..n);
+    // Place the goal car ('>') in the starting position
     board[n - 1][0] = goal_car;
 
     board
