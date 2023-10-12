@@ -1,7 +1,6 @@
 use std::fs::File;
 use std::io::{self,BufRead};
-use rand::Rng;
-use std::cmp::Ordering;
+// use rand::Rng;
 
 use std::collections:: {HashMap, HashSet, VecDeque, BinaryHeap};
 
@@ -26,7 +25,7 @@ impl Board {
 fn main() {
     // Code to read a bug rush board from a file
     let mut read_board:Vec<Vec<char>> = Vec::new();
-    match read_bug_rush_board("some5x7.bugs") {
+    match read_bug_rush_board("bugrush.bugs") {
         Ok(result) => {
             read_board = result;
         }
@@ -53,7 +52,6 @@ fn main() {
     let mut steps:usize = 0;
     let mut bfs = false;
     let mut astar_steps = 0;
-    let mut bfs_steps = 0;
     match solution {
         Some(result) => {
             for step in result {
@@ -74,7 +72,7 @@ fn main() {
                         steps += 1;
                         print_board(&step.board);
                     }
-                    bfs_steps = steps - 1;
+                    let bfs_steps = steps - 1;
                     println!("Solved using BFS. Number of steps taken: {}", steps-1);
                     println!("A* steps: {}, BFS steps: {}", astar_steps, bfs_steps);
                     bfs = true;
@@ -95,9 +93,8 @@ fn main() {
                         println!("~~~~~~~~~~ Step {} ~~~~~~~~~~", steps);
                         steps += 1;
                         print_board(&step.board);
-                        bfs = true;
                     }
-                    bfs_steps = steps - 1;
+                    let bfs_steps = steps - 1;
                     println!("Solved using BFS. Number of steps taken: {}", steps-1);
                     println!("A* steps: {}, BFS steps: {}", astar_steps, bfs_steps);
                 }
@@ -118,7 +115,7 @@ fn solve_bug_rush_astar(initial_state: &Board) -> Option<Vec<Board>> {
     
     open_set.push(initial_state.clone());
     g_score.insert(initial_state.clone(), 0);
-    let initial_f_score = heuristic(&initial_state);
+    let initial_f_score = heuristic(initial_state);
     f_score.insert(initial_state.clone(), initial_f_score);
 
     while let Some(current) = open_set.pop() {
@@ -201,12 +198,8 @@ fn h3_heuristic(board: &Board) -> u32 {
     // Check if there are any vehicles blocking the path to the exit
     for row in 0..board.rows {
         for col in 0..board.cols {
-            if board.board[row][col] != ' ' {
-                if row == target_row {
-                    if col > target_col {
-                        blocking_cars += 1;
-                    }
-                }
+            if board.board[row][col] != ' ' && row == target_row && col > target_col{
+                blocking_cars += 1;
             }
         }
     }
@@ -280,42 +273,42 @@ fn neighbors(board: &Board) -> Vec<Board> {
     neighboring_states
 }
 
-/// Generates a random n by n bug rush board (doesn't gaurantee solvability)
-fn generate_random_bug_rush(n: usize) -> Vec<Vec<char>> {
-    let mut rng = rand::thread_rng();
-    let mut board: Vec<Vec<char>> = vec![vec![' '; n]; n];
-    let empty_space = ' ';
-    let horizontal_car = '-';
-    let vertical_car = '|';
-    let goal_car = '>';
+// /// Generates a random n by n bug rush board (doesn't gaurantee solvability)
+// fn generate_random_bug_rush(n: usize) -> Vec<Vec<char>> {
+//     let mut rng = rand::thread_rng();
+//     let mut board: Vec<Vec<char>> = vec![vec![' '; n]; n];
+//     let empty_space = ' ';
+//     let horizontal_car = '-';
+//     let vertical_car = '|';
+//     let goal_car = '>';
 
-    // Fill the rest of the board with random cars
-    for row in 0..n {
-        for col in 0..n {
-            let car_type = if rng.gen_bool(0.5) { horizontal_car } else { vertical_car };
-            board[row][col] = car_type;
-        }
-    }
+//     // Fill the rest of the board with random cars
+//     for row in 0..n {
+//         for col in 0..n {
+//             let car_type = if rng.gen_bool(0.5) { horizontal_car } else { vertical_car };
+//             board[row][col] = car_type;
+//         }
+//     }
 
-    // Make some of the cars empty spaces
-    for _ in 0..(n * n / 2) {
-        let row = rng.gen_range(0..n);
-        let col = rng.gen_range(0..n);
-        board[row][col] = empty_space;
-    }
+//     // Make some of the cars empty spaces
+//     for _ in 0..(n * n / 2) {
+//         let row = rng.gen_range(0..n);
+//         let col = rng.gen_range(0..n);
+//         board[row][col] = empty_space;
+//     }
 
-    // Place the goal car ('>') in the starting position
-    board[n - 1][0] = goal_car;
+//     // Place the goal car ('>') in the starting position
+//     board[n - 1][0] = goal_car;
 
-    board
-}
+//     board
+// }
 
 fn print_board(board: &Vec<Vec<char>>) {
     for row in board {
         for character in row {
             print!("{}",character);
         }
-        println!("");
+        println!();
     }
 }
 
@@ -336,42 +329,42 @@ fn read_bug_rush_board(filename: &str) -> io::Result<Vec<Vec<char>>> {
     Ok(board)
 }
 
-/// Checks a board for solvability
-fn is_solvable(board: &Vec<Vec<char>>, ignore_top_row: bool) -> bool {
-    // Make sure goal care isn't blocked by horozontal cars
-    let mut goal_car_found = false;
-    for row in board {
-        for col in row {
-            if *col == '>' {
-                goal_car_found = true;
-            } else {
-                if goal_car_found && *col == '-'{
-                    return false;
-                }
-            }
-        }
-        if goal_car_found {
-            break;
-        }
-    }
-    let mut flattened_board: Vec<char> = board.iter().flatten().cloned().collect();
-    if ignore_top_row {
-        flattened_board = board.iter().skip(1).flatten().cloned().collect();
-    }
+// /// Checks a board for solvability
+// fn is_solvable(board: &Vec<Vec<char>>, ignore_top_row: bool) -> bool {
+//     // Make sure goal care isn't blocked by horozontal cars
+//     let mut goal_car_found = false;
+//     for row in board {
+//         for col in row {
+//             if *col == '>' {
+//                 goal_car_found = true;
+//             } else {
+//                 if goal_car_found && *col == '-'{
+//                     return false;
+//                 }
+//             }
+//         }
+//         if goal_car_found {
+//             break;
+//         }
+//     }
+//     let mut flattened_board: Vec<char> = board.iter().flatten().cloned().collect();
+//     if ignore_top_row {
+//         flattened_board = board.iter().skip(1).flatten().cloned().collect();
+//     }
 
-    // Count the number of inversions
-    let mut inversions = 0;
-    for i in 0..flattened_board.len() {
-        for j in i + 1..flattened_board.len() {
-            if flattened_board[i] != ' ' && flattened_board[j] != ' ' && flattened_board[i] > flattened_board[j] {
-                inversions += 1;
-            }
-        }
-    }
+//     // Count the number of inversions
+//     let mut inversions = 0;
+//     for i in 0..flattened_board.len() {
+//         for j in i + 1..flattened_board.len() {
+//             if flattened_board[i] != ' ' && flattened_board[j] != ' ' && flattened_board[i] > flattened_board[j] {
+//                 inversions += 1;
+//             }
+//         }
+//     }
 
-    // If the number of inversions is even, the puzzle is solvable
-    inversions % 2 == 0
-}
+//     // If the number of inversions is even, the puzzle is solvable
+//     inversions % 2 == 0
+// }
 
 /// BFS solution - gaurentees shortest path, doesn't gaurentee any effeciency
 fn solve_bug_rush_bfs(initial_state: &Board) -> Option<Vec<Board>> {
