@@ -1,9 +1,9 @@
 use std::fs::File;
-use std::io::{self, BufRead};
+use std::io::{self,BufRead};
 // use rand::Rng;
 use std::time::Instant;
 
-use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+use std::collections:: {HashMap, HashSet, VecDeque, BinaryHeap};
 
 // Define a structure to represent the puzzle board
 #[derive(Eq, Hash, PartialEq, Ord, PartialOrd, Clone)]
@@ -15,24 +15,29 @@ struct Board {
 
 impl Board {
     fn new(board: Vec<Vec<char>>, rows: usize, cols: usize) -> Board {
-        Board { board, rows, cols }
+        Board {
+            board,
+            rows,
+            cols,
+        }
     }
 }
 
 fn main() {
     // Code to read a bug rush board from a file
-    let mut read_board: Vec<Vec<char>> = Vec::new();
+    let mut read_board:Vec<Vec<char>> = Vec::new();
     match read_bug_rush_board("some5x7.bugs") {
         Ok(result) => {
             read_board = result;
         }
         Err(error) => {
-            println!("{}", error);
+            println!("{}",error);
         }
     }
     let rows = read_board.len();
     let cols = read_board[0].len();
-    let board: Board = Board::new(read_board, rows, cols);
+    let board:Board = Board::new(read_board, rows, cols);
+
 
     // Code to generate a random game board
     // let n = 6;
@@ -48,17 +53,17 @@ fn main() {
     let solution = solve_bug_rush_bfs(&board);
     let end = Instant::now();
     let bfs_time = end.duration_since(start);
-    let mut steps: usize = 0;
+    // let mut steps:usize = 0;
     match solution {
         Some(result) => {
-            for step in result {
-                println!("~~~~~~~~~~ Step {} ~~~~~~~~~~", steps);
-                steps += 1;
-                print_board(&step.board);
-            }
-            println!("Solved using BFS. Number of steps taken: {}", steps - 1);
-            let bfs_steps = steps;
-            steps = 0;
+            // for step in result {
+            //     println!("~~~~~~~~~~ Step {} ~~~~~~~~~~", steps);
+            //     steps += 1;
+            //     print_board(&step.board);
+            // }
+            // println!("Solved using BFS. Number of steps taken: {}", steps-1);
+            // let bfs_steps = steps;
+            // steps = 0;
 
             let start = Instant::now();
             //Try using A*
@@ -67,21 +72,13 @@ fn main() {
             let astar_time = end.duration_since(start);
             match astar_solution {
                 Some(astar_result) => {
-                    for step in astar_result {
-                        println!("~~~~~~~~~~ Step {} ~~~~~~~~~~", steps);
-                        steps += 1;
-                        print_board(&step.board);
-                    }
-                    println!(
-                        "Solved using A*. Number of steps: {}. Time in milliseconds: {}",
-                        steps - 1,
-                        astar_time.as_millis()
-                    );
-                    println!(
-                        "Solved using BFS. Number of steps: {}. Time in milliseconds: {}",
-                        bfs_steps - 1,
-                        bfs_time.as_millis()
-                    );
+                    // for step in astar_result {
+                    //     println!("~~~~~~~~~~ Step {} ~~~~~~~~~~", steps);
+                    //     steps += 1;
+                    //     print_board(&step.board);
+                    // }
+                    println!("Solved using A*. Number of steps: {}. Time in milliseconds: {}", astar_result.len()-1,astar_time.as_millis());
+                    println!("Solved using BFS. Number of steps: {}. Time in milliseconds: {}", result.len()-1,bfs_time.as_millis());
                 }
                 None => {
                     println!("A* failed to find a solution.");
@@ -101,7 +98,7 @@ fn solve_bug_rush_astar(initial_state: &Board) -> Option<Vec<Board>> {
     let mut g_score: HashMap<Board, u32> = HashMap::new();
     let mut f_score: HashMap<Board, u32> = HashMap::new();
     let mut visited: HashSet<Board> = HashSet::new();
-
+    
     open_set.push(initial_state.clone());
     g_score.insert(initial_state.clone(), 0);
     let initial_f_score = heuristic(initial_state);
@@ -121,13 +118,11 @@ fn solve_bug_rush_astar(initial_state: &Board) -> Option<Vec<Board>> {
                 continue; // Skip visited states
             }
 
-            if g_score.contains_key(&current) {
+            if g_score.contains_key(&current){
                 let tentative_g_score: u32 = g_score[&current] + 1;
                 let temp_f_score = tentative_g_score + heuristic(&neighbor);
 
-                if (f_score.contains_key(&current) && f_score[&current] >= temp_f_score)
-                    || !g_score.contains_key(&neighbor)
-                {
+                if (f_score.contains_key(&current) && f_score[&current] >= temp_f_score) || !g_score.contains_key(&neighbor) {
                     // print_board(&neighbor.board);
                     // println!("{},{}",f_score[&current], temp_f_score);
                     if !came_from.contains_key(&neighbor) {
@@ -139,12 +134,13 @@ fn solve_bug_rush_astar(initial_state: &Board) -> Option<Vec<Board>> {
                         // Explicitly push the neighbor into the BinaryHeap with its F score
                         open_set.push(neighbor.clone());
                     }
+
                 }
             }
         }
     }
 
-    None // No path found
+    None  // No path found
 }
 
 /// Heuristic root calls different heuristics seperately to make changing the weights easy
@@ -167,6 +163,7 @@ fn h1_heuristic(board: &Board) -> u32 {
     0
 }
 
+
 /// Check how many cars are blocking the goal car
 fn h3_heuristic(board: &Board) -> u32 {
     let mut target_row = 0; // Row of the target vehicle
@@ -178,6 +175,7 @@ fn h3_heuristic(board: &Board) -> u32 {
                 target_col = col;
                 target_row = row;
                 break 'outer;
+
             }
         }
     }
@@ -189,7 +187,7 @@ fn h3_heuristic(board: &Board) -> u32 {
     for row in 0..board.rows {
         for col in 0..board.cols {
             let current_car = board.board[row][col];
-            if current_car != ' ' && row == target_row && col > target_col {
+            if current_car != ' ' && row == target_row && col > target_col{
                 blocking_cars += 1;
 
                 // Check for blocking vehicles above
@@ -202,7 +200,7 @@ fn h3_heuristic(board: &Board) -> u32 {
                     }
                 }
                 // Check for blocking vehicles below
-                for r in (row + 1)..board.rows {
+                for r in (row+1)..board.rows {
                     if board.board[r][col] != ' ' {
                         blocking_cars += 1;
                     } else {
@@ -215,9 +213,7 @@ fn h3_heuristic(board: &Board) -> u32 {
     }
 
     // Return the sum of both types of blocking vehicles
-    blocking_cars
-        .try_into()
-        .expect("Failed to convert u32 (h3_heuristic)")
+    blocking_cars.try_into().expect("Failed to convert u32 (h3_heuristic)")
 }
 
 /// Gets all valid moves "neighbors"
@@ -318,7 +314,7 @@ fn neighbors(board: &Board) -> Vec<Board> {
 fn print_board(board: &Vec<Vec<char>>) {
     for row in board {
         for character in row {
-            print!("{}", character);
+            print!("{}",character);
         }
         println!();
     }
@@ -407,7 +403,10 @@ fn solve_bug_rush_bfs(initial_state: &Board) -> Option<Vec<Board>> {
 }
 
 /// Backtracks the steps made to find the solution so it can be printed nicely
-fn build_solution_path(parent: &HashMap<Board, Board>, goal_state: &Board) -> Option<Vec<Board>> {
+fn build_solution_path(
+    parent: &HashMap<Board, Board>,
+    goal_state: &Board,
+) -> Option<Vec<Board>> {
     let mut solution_path = Vec::new();
     let mut current_state = goal_state.clone();
 
