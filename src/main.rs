@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{self,BufRead};
 // use rand::Rng;
 use std::time::Instant;
+use std::env;
 
 use std::collections:: {HashMap, HashSet, VecDeque, BinaryHeap};
 
@@ -24,14 +25,20 @@ impl Board {
 }
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    if args.len() != 2 {
+        eprintln!("Please only use one argument of the bugrush board's file name.");
+        std::process::exit(1);
+    }
+    let file_name:&str = &args[1];
     // Code to read a bug rush board from a file
     let mut read_board:Vec<Vec<char>> = Vec::new();
-    match read_bug_rush_board("some5x7.bugs") {
+    match read_bug_rush_board(file_name) {
         Ok(result) => {
             read_board = result;
         }
         Err(error) => {
-            println!("{}",error);
+            eprintln!("{}",error);
         }
     }
     let rows = read_board.len();
@@ -49,43 +56,31 @@ fn main() {
     println!("~~~~~~~~~~~ Initial board state ~~~~~~~~~~~");
     print_board(&board.board);
     println!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    // Start with BFS to determine if it is solvable
     let start = Instant::now();
     let solution = solve_bug_rush_bfs(&board);
     let end = Instant::now();
     let bfs_time = end.duration_since(start);
-    // let mut steps:usize = 0;
     match solution {
         Some(result) => {
-            // for step in result {
-            //     println!("~~~~~~~~~~ Step {} ~~~~~~~~~~", steps);
-            //     steps += 1;
-            //     print_board(&step.board);
-            // }
-            // println!("Solved using BFS. Number of steps taken: {}", steps-1);
-            // let bfs_steps = steps;
-            // steps = 0;
-
-            let start = Instant::now();
             //Try using A*
+            let start = Instant::now();
             let astar_solution = solve_bug_rush_astar(&board);
             let end = Instant::now();
             let astar_time = end.duration_since(start);
             match astar_solution {
                 Some(astar_result) => {
-                    // for step in astar_result {
-                    //     println!("~~~~~~~~~~ Step {} ~~~~~~~~~~", steps);
-                    //     steps += 1;
-                    //     print_board(&step.board);
-                    // }
                     println!("Solved using A*. Number of steps: {}. Time in milliseconds: {}", astar_result.len()-1,astar_time.as_millis());
                     println!("Solved using BFS. Number of steps: {}. Time in milliseconds: {}", result.len()-1,bfs_time.as_millis());
                 }
                 None => {
                     println!("A* failed to find a solution.");
+                    println!("Solved using BFS. Number of steps: {}. Time in milliseconds: {}", result.len()-1,bfs_time.as_millis());
                 }
             }
         }
         None => {
+            // No solution
             println!("unsat.");
         }
     }
