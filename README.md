@@ -32,6 +32,8 @@ Assuming you have cargo and rust installed, ensure the game board file is in the
 
 ```cargo run some5x7.bugs```
 
+If you dont have Rust installed [Rust Official Website - Install](https://www.rust-lang.org/tools/install)
+
 This project provided plenty of challenge in remembering and using a lot of different algorithms and data structures. 
 
 Once you have your data structures, your 'move or neighbors' functions built it becomes much easier to build other solutions.
