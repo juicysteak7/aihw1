@@ -24,11 +24,11 @@ You may write your program on any platform you like, but your program should bui
 
 Your program should read an instance in the ASCII format described above from a file whose name is supplied on the command line. Your program should then print the number of moves for a shortest solution to the instance. If the instance cannot be solved, your program should instead print "unsat".
 
-## Project Details
+## Project Notes
 
 The implementation of this project is in the Rust programming language.
 
-To use the program ensure the game board the program will play is in the root directory of the project. Run the following command to run the program (with the appropriate filename).
+Assuming you cargo and rust installed. Ensure the game board file is in the root directory of the project. Run the following command to run the program (with the appropriate filename).
 
 ```cargo run some5x7.bugs```
 
@@ -39,3 +39,5 @@ Once you have your data structures, your 'move or neighbors' functions built it 
 After my BFS solutions I reused some of the functions like 'neighbors' to make an A* solution.
 
 Finding good hueristics to make my A* find a better solution is where I spent a lot of time. I sometimes weighted things too much or tried to complex a heurstic and it typically made my A* search preform worse than simple heurstics like 'manhattan distance' and 'blocking cars'.
+
+I couldn't get my A* solution just right, it succeded on most of the small boards, finding the shortest path quickly, but the large ones it took more time and more steps than bfs.

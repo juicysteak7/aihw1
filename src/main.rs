@@ -1,10 +1,11 @@
 use std::fs::File;
-use std::io::{self,BufRead};
+use std::io::{self, BufRead};
 // use rand::Rng;
-use std::time::Instant;
+// use std::time::Instant;
 use std::env;
 
-use std::collections:: {HashMap, HashSet, VecDeque, BinaryHeap};
+// use std::collections:: {HashMap, HashSet, VecDeque, BinaryHeap};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 // Define a structure to represent the puzzle board
 #[derive(Eq, Hash, PartialEq, Ord, PartialOrd, Clone)]
@@ -16,11 +17,7 @@ struct Board {
 
 impl Board {
     fn new(board: Vec<Vec<char>>, rows: usize, cols: usize) -> Board {
-        Board {
-            board,
-            rows,
-            cols,
-        }
+        Board { board, rows, cols }
     }
 }
 
@@ -30,21 +27,20 @@ fn main() {
         eprintln!("Please only use one argument of the bugrush board's file name.");
         std::process::exit(1);
     }
-    let file_name:&str = &args[1];
+    let file_name: &str = &args[1];
     // Code to read a bug rush board from a file
-    let mut read_board:Vec<Vec<char>> = Vec::new();
+    let mut read_board: Vec<Vec<char>> = Vec::new();
     match read_bug_rush_board(file_name) {
         Ok(result) => {
             read_board = result;
         }
         Err(error) => {
-            eprintln!("{}",error);
+            eprintln!("{}", error);
         }
     }
     let rows = read_board.len();
     let cols = read_board[0].len();
-    let board:Board = Board::new(read_board, rows, cols);
-
+    let board: Board = Board::new(read_board, rows, cols);
 
     // Code to generate a random game board
     // let n = 6;
@@ -53,163 +49,168 @@ fn main() {
     //     board.board = generate_random_bug_rush(n);
     // }
 
-    println!("~~~~~~~~~~~ Initial board state ~~~~~~~~~~~");
-    print_board(&board.board);
-    println!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+    // Print initial board
+    // println!("~~~~~~~~~~~ Initial board state ~~~~~~~~~~~");
+    // print_board(&board.board);
+    // println!("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+
+
     // Start with BFS to determine if it is solvable
-    let start = Instant::now();
+    // let start = Instant::now(); // start time
     let solution = solve_bug_rush_bfs(&board);
-    let end = Instant::now();
-    let bfs_time = end.duration_since(start);
+    // let end = Instant::now(); // end time
+    // let bfs_time = end.duration_since(start); // total time
     match solution {
         Some(result) => {
-            //Try using A*
-            let start = Instant::now();
-            let astar_solution = solve_bug_rush_astar(&board);
-            let end = Instant::now();
-            let astar_time = end.duration_since(start);
-            match astar_solution {
-                Some(astar_result) => {
-                    println!("Solved using A*. Number of steps: {}. Time in milliseconds: {}", astar_result.len()-1,astar_time.as_millis());
-                    println!("Solved using BFS. Number of steps: {}. Time in milliseconds: {}", result.len()-1,bfs_time.as_millis());
-                }
-                None => {
-                    println!("A* failed to find a solution.");
-                    println!("Solved using BFS. Number of steps: {}. Time in milliseconds: {}", result.len()-1,bfs_time.as_millis());
-                }
-            }
+            // //Try using A*
+            // let start = Instant::now();
+            // let astar_solution = solve_bug_rush_astar(&board);
+            // let end = Instant::now();
+            // let astar_time = end.duration_since(start);
+            // match astar_solution {
+            //     Some(astar_result) => {
+            //         println!("Solved using A*. Number of steps: {}. Time in milliseconds: {}", astar_result.len()-1,astar_time.as_millis());
+            //         println!("Solved using BFS. Number of steps: {}. Time in milliseconds: {}", result.len()-1,bfs_time.as_millis());
+            //     }
+            //     None => {
+            //         println!("A* failed to find a solution.");
+            //         println!("Solved using BFS. Number of steps: {}. Time in milliseconds: {}", result.len()-1,bfs_time.as_millis());
+            //     }
+            // }
+
+            // print result
+            println!("{}", result.len() - 1);
         }
         None => {
             // No solution
-            println!("unsat.");
+            println!("unsat");
         }
     }
 }
 
-/// A* implementation uses basic heuristics to find solution, not gaurenteed the shortest solution
-fn solve_bug_rush_astar(initial_state: &Board) -> Option<Vec<Board>> {
-    let mut open_set: BinaryHeap<Board> = BinaryHeap::new();
-    let mut came_from: HashMap<Board, Board> = HashMap::new();
-    let mut g_score: HashMap<Board, u32> = HashMap::new();
-    let mut f_score: HashMap<Board, u32> = HashMap::new();
-    let mut visited: HashSet<Board> = HashSet::new();
-    
-    open_set.push(initial_state.clone());
-    g_score.insert(initial_state.clone(), 0);
-    let initial_f_score = heuristic(initial_state);
-    f_score.insert(initial_state.clone(), initial_f_score);
+// /// A* implementation uses basic heuristics to find solution, not gaurenteed the shortest solution
+// fn solve_bug_rush_astar(initial_state: &Board) -> Option<Vec<Board>> {
+//     let mut open_set: BinaryHeap<Board> = BinaryHeap::new();
+//     let mut came_from: HashMap<Board, Board> = HashMap::new();
+//     let mut g_score: HashMap<Board, u32> = HashMap::new();
+//     let mut f_score: HashMap<Board, u32> = HashMap::new();
+//     let mut visited: HashSet<Board> = HashSet::new();
 
-    while let Some(current) = open_set.pop() {
-        visited.insert(current.clone());
+//     open_set.push(initial_state.clone());
+//     g_score.insert(initial_state.clone(), 0);
+//     let initial_f_score = heuristic(initial_state);
+//     f_score.insert(initial_state.clone(), initial_f_score);
 
-        // If current is the goal state, reconstruct the path and return it
-        if is_solved(&current) {
-            return build_solution_path(&came_from, &current);
-        }
+//     while let Some(current) = open_set.pop() {
+//         visited.insert(current.clone());
 
-        // Iterate through neighbors and update g_scores
-        for neighbor in neighbors(&current) {
-            if visited.contains(&neighbor) {
-                continue; // Skip visited states
-            }
+//         // If current is the goal state, reconstruct the path and return it
+//         if is_solved(&current) {
+//             return build_solution_path(&came_from, &current);
+//         }
 
-            if g_score.contains_key(&current){
-                let tentative_g_score: u32 = g_score[&current] + 1;
-                let temp_f_score = tentative_g_score + heuristic(&neighbor);
+//         // Iterate through neighbors and update g_scores
+//         for neighbor in neighbors(&current) {
+//             if visited.contains(&neighbor) {
+//                 continue; // Skip visited states
+//             }
 
-                if (f_score.contains_key(&current) && f_score[&current] >= temp_f_score) || !g_score.contains_key(&neighbor) {
-                    // print_board(&neighbor.board);
-                    // println!("{},{}",f_score[&current], temp_f_score);
-                    if !came_from.contains_key(&neighbor) {
-                        came_from.insert(neighbor.clone(), current.clone());
-                        visited.insert(neighbor.clone());
-                        g_score.insert(neighbor.clone(), tentative_g_score);
-                        f_score.insert(neighbor.clone(), temp_f_score);
+//             if g_score.contains_key(&current){
+//                 let tentative_g_score: u32 = g_score[&current] + 1;
+//                 let temp_f_score = tentative_g_score + heuristic(&neighbor);
 
-                        // Explicitly push the neighbor into the BinaryHeap with its F score
-                        open_set.push(neighbor.clone());
-                    }
+//                 if (f_score.contains_key(&current) && f_score[&current] >= temp_f_score) || !g_score.contains_key(&neighbor) {
+//                     // print_board(&neighbor.board);
+//                     // println!("{},{}",f_score[&current], temp_f_score);
+//                     if !came_from.contains_key(&neighbor) {
+//                         came_from.insert(neighbor.clone(), current.clone());
+//                         visited.insert(neighbor.clone());
+//                         g_score.insert(neighbor.clone(), tentative_g_score);
+//                         f_score.insert(neighbor.clone(), temp_f_score);
 
-                }
-            }
-        }
-    }
+//                         // Explicitly push the neighbor into the BinaryHeap with its F score
+//                         open_set.push(neighbor.clone());
+//                     }
 
-    None  // No path found
-}
+//                 }
+//             }
+//         }
+//     }
 
-/// Heuristic root calls different heuristics seperately to make changing the weights easy
-fn heuristic(board: &Board) -> u32 {
-    h3_heuristic(board) + h1_heuristic(board)
-    // h3_heuristic(board)
-    // h1_heuristic(board)
-}
+//     None  // No path found
+// }
 
-/// Check distance from solution
-fn h1_heuristic(board: &Board) -> u32 {
-    for row in 0..board.board.len() {
-        for col in 0..board.board[0].len() {
-            // Goal car found
-            if board.board[row][col] == '>' {
-                return (board.board[0].len() - col) as u32;
-            }
-        }
-    }
-    0
-}
+// /// Heuristic root calls different heuristics seperately to make changing the weights easy
+// fn heuristic(board: &Board) -> u32 {
+//     h2_heuristic(board) + h1_heuristic(board)
+//     // h2_heuristic(board)
+//     // h1_heuristic(board)
+// }
 
+// /// Check distance from solution
+// fn h1_heuristic(board: &Board) -> u32 {
+//     for row in 0..board.board.len() {
+//         for col in 0..board.board[0].len() {
+//             // Goal car found
+//             if board.board[row][col] == '>' {
+//                 return (board.board[0].len() - col) as u32;
+//             }
+//         }
+//     }
+//     0
+// }
 
-/// Check how many cars are blocking the goal car
-fn h3_heuristic(board: &Board) -> u32 {
-    let mut target_row = 0; // Row of the target vehicle
-    let mut target_col = 0; // Column of the target vehicle
-    'outer: for row in 0..board.board.len() {
-        for col in 0..board.board[0].len() {
-            // Goal car found
-            if board.board[row][col] == '>' {
-                target_col = col;
-                target_row = row;
-                break 'outer;
+// /// Check how many cars are blocking the goal car
+// fn h2_heuristic(board: &Board) -> u32 {
+//     let mut target_row = 0; // Row of the target vehicle
+//     let mut target_col = 0; // Column of the target vehicle
+//     'outer: for row in 0..board.board.len() {
+//         for col in 0..board.board[0].len() {
+//             // Goal car found
+//             if board.board[row][col] == '>' {
+//                 target_col = col;
+//                 target_row = row;
+//                 break 'outer;
 
-            }
-        }
-    }
+//             }
+//         }
+//     }
 
-    // Initialize counters for blocking vehicles
-    let mut blocking_cars = 0;
+//     // Initialize counters for blocking vehicles
+//     let mut blocking_cars = 0;
 
-    // Check if there are any vehicles blocking the path to the exit
-    for row in 0..board.rows {
-        for col in 0..board.cols {
-            let current_car = board.board[row][col];
-            if current_car != ' ' && row == target_row && col > target_col{
-                blocking_cars += 1;
+//     // Check if there are any vehicles blocking the path to the exit
+//     for row in 0..board.rows {
+//         for col in 0..board.cols {
+//             let current_car = board.board[row][col];
+//             if current_car != ' ' && row == target_row && col > target_col{
+//                 blocking_cars += 1;
 
-                // Check for blocking vehicles above
-                for r in 0..row {
-                    if board.board[r][col] != ' ' {
-                        blocking_cars += 1;
-                    } else {
-                        // Break if a empty cell is encountered
-                        break;
-                    }
-                }
-                // Check for blocking vehicles below
-                for r in (row+1)..board.rows {
-                    if board.board[r][col] != ' ' {
-                        blocking_cars += 1;
-                    } else {
-                        // Break if a empty cell is encountered
-                        break;
-                    }
-                }
-            }
-        }
-    }
+//                 // Check for blocking vehicles above
+//                 for r in 0..row {
+//                     if board.board[r][col] != ' ' {
+//                         blocking_cars += 1;
+//                     } else {
+//                         // Break if a empty cell is encountered
+//                         break;
+//                     }
+//                 }
+//                 // Check for blocking vehicles below
+//                 for r in (row+1)..board.rows {
+//                     if board.board[r][col] != ' ' {
+//                         blocking_cars += 1;
+//                     } else {
+//                         // Break if a empty cell is encountered
+//                         break;
+//                     }
+//                 }
+//             }
+//         }
+//     }
 
-    // Return the sum of both types of blocking vehicles
-    blocking_cars.try_into().expect("Failed to convert u32 (h3_heuristic)")
-}
+//     // Return the sum of both types of blocking vehicles
+//     blocking_cars.try_into().expect("Failed to convert u32 (h2_heuristic)")
+// }
 
 /// Gets all valid moves "neighbors"
 fn neighbors(board: &Board) -> Vec<Board> {
@@ -306,14 +307,14 @@ fn neighbors(board: &Board) -> Vec<Board> {
 //     board
 // }
 
-fn print_board(board: &Vec<Vec<char>>) {
-    for row in board {
-        for character in row {
-            print!("{}",character);
-        }
-        println!();
-    }
-}
+// fn print_board(board: &Vec<Vec<char>>) {
+//     for row in board {
+//         for character in row {
+//             print!("{}", character);
+//         }
+//         println!();
+//     }
+// }
 
 /// Reads a bug rush board from file and returns it
 fn read_bug_rush_board(filename: &str) -> io::Result<Vec<Vec<char>>> {
@@ -398,10 +399,7 @@ fn solve_bug_rush_bfs(initial_state: &Board) -> Option<Vec<Board>> {
 }
 
 /// Backtracks the steps made to find the solution so it can be printed nicely
-fn build_solution_path(
-    parent: &HashMap<Board, Board>,
-    goal_state: &Board,
-) -> Option<Vec<Board>> {
+fn build_solution_path(parent: &HashMap<Board, Board>, goal_state: &Board) -> Option<Vec<Board>> {
     let mut solution_path = Vec::new();
     let mut current_state = goal_state.clone();
 
