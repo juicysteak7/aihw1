@@ -28,7 +28,7 @@ Your program should read an instance in the ASCII format described above from a 
 
 The implementation of this project is in the Rust programming language.
 
-Assuming you have cargo and rust installed. Ensure the game board file is in the root directory of the project. Run the following command to run the program (with the appropriate filename).
+Assuming you have cargo and rust installed, ensure the game board file is in the root directory of the project. Run the following command to run the program (with the appropriate filename).
 
 ```cargo run some5x7.bugs```
 
